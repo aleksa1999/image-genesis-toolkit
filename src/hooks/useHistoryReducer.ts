@@ -11,7 +11,7 @@ type HistoryAction<T> =
   | { type: 'UNDO' }
   | { type: 'REDO' }
   | { type: 'SET'; payload: T }
-  | { type: 'CLEAR' };
+  | { type: 'CLEAR'; payload: T };
 
 const MAX_HISTORY_SIZE = 25;
 
@@ -51,7 +51,7 @@ function historyReducer<T>(state: HistoryState<T>, action: HistoryAction<T>): Hi
     case 'CLEAR':
       return {
         past: [],
-        present: action.payload as T,
+        present: action.payload,
         future: [],
       };
 
