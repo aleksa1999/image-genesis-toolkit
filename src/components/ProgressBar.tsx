@@ -1,51 +1,31 @@
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
+import useSWR from 'swr';
+
+const fetcher = (url: string) => fetch(url).then(res => res.json());
 
 export const ProgressBar = () => {
-  const [progress, setProgress] = useState(0);
-  const [isVisible, setIsVisible] = useState(false);
+  const { data, error } = useSWR('/queue/progress', fetcher, {
+    refreshInterval: 500,
+    revalidateOnFocus: false,
+    shouldRetryOnError: false,
+  });
 
-  useEffect(() => {
-    // Simulate progress updates
-    let interval: NodeJS.Timeout;
-    
-    if (isVisible) {
-      interval = setInterval(() => {
-        setProgress(prev => {
-          if (prev >= 100) {
-            setIsVisible(false);
-            return 0;
-          }
-          return prev + Math.random() * 10;
-        });
-      }, 500);
-    }
-
-    return () => {
-      if (interval) clearInterval(interval);
-    };
-  }, [isVisible]);
-
-  // Listen for generation start (this would normally come from your state management)
-  useEffect(() => {
-    const handleGenerationStart = () => {
-      setProgress(0);
-      setIsVisible(true);
-    };
-
-    // Simulate starting progress when generation begins
-    window.addEventListener('generation-start', handleGenerationStart);
-    return () => window.removeEventListener('generation-start', handleGenerationStart);
-  }, []);
+  const progress = data?.percent || 0;
+  const isVisible = progress > 0 && progress < 100;
 
   if (!isVisible) return null;
 
   return (
-    <div className="w-full h-1 bg-gray-800">
+    <div className="w-full h-1 bg-gray-800 relative overflow-hidden">
       <div
         className="h-full bg-blue-500 transition-all duration-300 ease-out"
-        style={{ width: `${Math.min(progress, 100)}%` }}
+        style={{ 
+          width: `${Math.min(progress, 100)}%`,
+          transform: `translateX(0%)`,
+        }}
       />
+      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-pulse" />
     </div>
   );
 };

@@ -1,15 +1,20 @@
 
 import { useEffect } from 'react';
 
-export const useHotkeys = () => {
+export const useHotkeys = (onGenerate?: () => void, onSaveSettings?: () => void) => {
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       // Ctrl+Enter for Generate
       if (event.ctrlKey && event.key === 'Enter') {
         event.preventDefault();
-        const generateButton = document.querySelector('button:contains("Generate")') as HTMLButtonElement;
-        if (generateButton) {
-          generateButton.click();
+        if (onGenerate) {
+          onGenerate();
+        } else {
+          // Fallback to clicking the button
+          const generateButton = document.querySelector('button:has-text("Generate Image")') as HTMLButtonElement;
+          if (generateButton) {
+            generateButton.click();
+          }
         }
         console.log('Generate image shortcut triggered');
       }
@@ -17,9 +22,14 @@ export const useHotkeys = () => {
       // Shift+S for Save Settings
       if (event.shiftKey && event.key === 'S') {
         event.preventDefault();
-        const saveButton = document.querySelector('button:contains("Save")') as HTMLButtonElement;
-        if (saveButton) {
-          saveButton.click();
+        if (onSaveSettings) {
+          onSaveSettings();
+        } else {
+          // Fallback to clicking the button
+          const saveButton = document.querySelector('button:has-text("Save Settings")') as HTMLButtonElement;
+          if (saveButton) {
+            saveButton.click();
+          }
         }
         console.log('Save settings shortcut triggered');
       }
@@ -39,5 +49,5 @@ export const useHotkeys = () => {
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, []);
+  }, [onGenerate, onSaveSettings]);
 };
